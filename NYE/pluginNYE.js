@@ -8,6 +8,7 @@
 (() => {
     //////////////////////////////////////////////////////
     const DAYS_THRESHOLD = 7;                           // Threshold to show "days, hours, minutes, seconds", otherwise show "hours, minutes, seconds"
+    const DAYS_DIGITAL_FONT = false;                    // Days to be displayed with a digital font
     const EVENT_NAME = "NEW YEAR COUNTDOWN";            // Name of event
     //////////////////////////////////////////////////////
 
@@ -54,14 +55,28 @@
 
         const fontSize = window.innerHeight < 860 ? 64 : 72;
 
-        let timeDisplay;
+        let timeDisplay, timeDisplayDays;
         if (totalDays >= DAYS_THRESHOLD) {
-            timeDisplay = `${totalDays}d ${hours}:${minutes}:${seconds}`;
+            timeDisplayDays = `${totalDays}d&nbsp;`;
+            timeDisplay = `${hours}:${minutes}:${seconds}`;
         } else {
             timeDisplay = `${totalHours}:${minutes}:${seconds}`;
         }
 
-        countdownElement.innerHTML = `<span class="text-small" style="font-family: 'Titillium Web', sans-serif; font-size: ${fontSize / 3}px; color: var(--color-5); font-weight: 700; opacity: 0.9; line-height: 1.6;">${EVENT_NAME}</span> <span class="text-small" style="font-family: 'Digital-font', 'Titillium Web', sans-serif; font-size: ${fontSize}px; color: var(--color-text-2); opacity: 0.8;">${timeDisplay}</span>`;
+        const useDigitalFont = DAYS_DIGITAL_FONT ? 'Digital-font' : 'Titillium Web';
+        countdownElement.innerHTML = `
+          <span class="text-small" style="font-family: 'Titillium Web', sans-serif; font-size: ${fontSize / 3}px; color: var(--color-5); font-weight: 700; opacity: 0.9; line-height: 1.6;">
+            ${EVENT_NAME}
+          </span>
+          <span class="time-wrapper" style="display: inline-flex; align-items: center;">
+            <span class="text-small" style="font-family: '${useDigitalFont}', 'Titillium Web', sans-serif; font-size: ${fontSize}px; color: var(--color-text-2); opacity: 0.8; margin: -14px 0 -14px 0;">
+              ${timeDisplayDays}
+            </span>
+            <span class="text-small" style="font-family: 'Digital-font', 'Titillium Web', sans-serif; font-size: ${fontSize}px; color: var(--color-text-2); opacity: 0.8; margin: 0;">
+              ${timeDisplay}
+            </span>
+          </span>
+        `;
 
         if (timeLeft < 0) {
             clearInterval(interval);
