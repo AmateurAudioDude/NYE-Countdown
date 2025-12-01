@@ -1,5 +1,5 @@
 /*
-    NYE Countdown v1.0.1 by AAD
+    NYE Countdown v1.0.2 by AAD
     ----------------------------
 */
 
@@ -7,6 +7,7 @@
 
 (() => {
     //////////////////////////////////////////////////////
+    const PLUGIN_ENABLED = true;                        // Threshold to show "days, hours, minutes, seconds", otherwise show "hours, minutes, seconds"
     const DAYS_THRESHOLD = 7;                           // Threshold to show "days, hours, minutes, seconds", otherwise show "hours, minutes, seconds"
     const DAYS_DIGITAL_FONT = false;                    // Days to be displayed with a digital font
     const EVENT_NAME = "NEW YEAR COUNTDOWN";            // Name of event
@@ -15,33 +16,49 @@
     let showOnLoad = localStorage.getItem("pluginNyeCountdown");
     let firstLoad = false;
 
-    // Function to fetch server time
-    async function fetchServerTime() {
+    // Server time sync settings
+    const RESYNC_INTERVAL = 60 * 1000;
+
+    let initialServerTime = null;
+    let fetchLocalTime = null;
+
+    async function syncServerTime() {
         try {
             const response = await fetch('/server_time');
             const data = await response.json();
-            return new Date(data.serverTime).getTime();
+
+            initialServerTime = new Date(data.serverTime).getTime();
+            fetchLocalTime = Date.now(); // Record local time of sync
+
+            // console.log("Server resynced:", new Date(initialServerTime).toISOString());
         } catch (error) {
-            console.error('Error fetching server time:', error);
-            return null;
+            console.error('Error syncing server time:', error);
         }
     }
 
-    // Function to format time with leading zeroes
+    function getServerTime() {
+        if (initialServerTime === null || fetchLocalTime === null) return null;
+
+        const nowLocal = Date.now();
+        const elapsed = nowLocal - fetchLocalTime;
+
+        return initialServerTime + elapsed;
+    }
+
     function formatTime(value) {
         return value.toString().padStart(2, '0');
     }
 
-    // Function to update the countdown
-    async function updateCountdown() {
+    function updateCountdown() {
         const countdownElement = document.getElementById('new-countdown-div');
         if (!countdownElement) return;
 
         const now = new Date();
         const currentYear = now.getFullYear();
         const nextYear = (now.getMonth() === 0) ? currentYear : currentYear + 1;
+
         const newYear = new Date(`${nextYear}-01-01T00:00:00.000Z`).getTime();
-        const serverTime = await fetchServerTime();
+        const serverTime = getServerTime();
 
         if (!serverTime) return;
 
@@ -56,6 +73,7 @@
         const fontSize = window.innerHeight < 860 ? 64 : 72;
 
         let timeDisplay, timeDisplayDays;
+
         if (totalDays >= DAYS_THRESHOLD) {
             timeDisplayDays = `${totalDays}d&nbsp;`;
             timeDisplay = `${hours}:${minutes}:${seconds}`;
@@ -64,13 +82,14 @@
         }
 
         const useDigitalFont = DAYS_DIGITAL_FONT ? 'Digital-font' : 'Titillium Web';
+
         countdownElement.innerHTML = `
           <span class="text-small" style="font-family: 'Titillium Web', sans-serif; font-size: ${fontSize / 3}px; color: var(--color-5); font-weight: 700; opacity: 0.9; line-height: 1.6;">
             ${EVENT_NAME}
           </span>
           <span class="time-wrapper" style="display: inline-flex; align-items: center;">
             <span class="text-small" style="font-family: '${useDigitalFont}', 'Titillium Web', sans-serif; font-size: ${fontSize}px; color: var(--color-text-2); opacity: 0.8; margin: -14px 0 -14px 0;">
-              ${timeDisplayDays}
+              ${timeDisplayDays || ''}
             </span>
             <span class="text-small" style="font-family: 'Digital-font', 'Titillium Web', sans-serif; font-size: ${fontSize}px; color: var(--color-text-2); opacity: 0.8; margin: 0;">
               ${timeDisplay}
@@ -79,10 +98,24 @@
         `;
 
         if (timeLeft < 0) {
-            clearInterval(interval);
+            clearInterval(updateInterval);
+            clearInterval(resyncInterval);
             countdownElement.innerHTML = `<span style="font-size: ${fontSize}px; color: var(--color-5);">Happy New Year!</span>`;
         }
     }
+
+    let updateInterval = null;
+    let resyncInterval = null;
+
+    (async () => {
+        await syncServerTime(); // Fetch on start
+
+        updateInterval = setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Resync server time once per interval
+        resyncInterval = setInterval(syncServerTime, RESYNC_INTERVAL);
+    })();
 
     function loadFont(url) {
         const font = new FontFace('Digital-font', `url(${url})`);
@@ -138,6 +171,7 @@
 
     // Create Countdown button
     function createButton(buttonId) {
+        if (!PLUGIN_ENABLED) return;
         (function waitForFunction() {
             const maxWaitTime = 30000;
             let functionFound = false;
