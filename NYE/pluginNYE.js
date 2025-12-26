@@ -8,12 +8,13 @@
 (() => {
     //////////////////////////////////////////////////////
     const PLUGIN_ENABLED = true;                        // Threshold to show "days, hours, minutes, seconds", otherwise show "hours, minutes, seconds"
+    const FORCE_DISPLAY_ON_LOAD = 'false';              // Ignore user preference and display countdown on page load
     const DAYS_THRESHOLD = 7;                           // Threshold to show "days, hours, minutes, seconds", otherwise show "hours, minutes, seconds"
     const DAYS_DIGITAL_FONT = false;                    // Days to be displayed with a digital font
     const EVENT_NAME = "NEW YEAR COUNTDOWN";            // Name of event
     //////////////////////////////////////////////////////
 
-    let showOnLoad = localStorage.getItem("pluginNyeCountdown");
+    let showOnLoad = (FORCE_DISPLAY_ON_LOAD === 'true' ? FORCE_DISPLAY_ON_LOAD : '') || localStorage.getItem("pluginNyeCountdown");
     let firstLoad = false;
 
     // Server time sync settings
@@ -315,6 +316,8 @@
         const observer = new MutationObserver(() => {
             toggleVisibility();
         });
+
+        if (!sdrGraph && !loggingCanvas) toggleVisibility();
 
         observer.observe(countdownDiv, {
             attributes: true,
