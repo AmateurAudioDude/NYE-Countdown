@@ -71,7 +71,9 @@
         const minutes = formatTime(Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)));
         const seconds = formatTime(Math.floor((timeLeft % (1000 * 60)) / 1000));
 
-        const fontSize = window.innerHeight < 860 ? 64 : 72;
+        const fontSize = window.innerHeight < 860
+          ? (window.innerHeight > window.innerWidth ? 56 : 64)
+          : (window.innerHeight > window.innerWidth ? 64 : 72);
 
         let timeDisplay, timeDisplayDays;
 
@@ -85,7 +87,7 @@
         const useDigitalFont = DAYS_DIGITAL_FONT ? 'Digital-font' : 'Titillium Web';
 
         countdownElement.innerHTML = `
-          <span class="text-small" style="font-family: 'Titillium Web', sans-serif; font-size: ${fontSize / 3}px; color: var(--color-5); font-weight: 700; opacity: 0.9; line-height: 1.6;">
+          <span class="text-small" style="font-family: 'Titillium Web', sans-serif; font-size: ${fontSize / 3}px; color: var(--color-5); font-weight: 700; opacity: 0.9; line-height: ${window.innerHeight > window.innerWidth ? 1.2 : 1.6};">
             ${EVENT_NAME}
           </span>
           <span class="time-wrapper" style="display: inline-flex; align-items: center;">
