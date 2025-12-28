@@ -11,7 +11,7 @@
     const FORCE_DISPLAY_ON_LOAD = 'false';              // Ignore user preference and display countdown on page load
     const DAYS_THRESHOLD = 7;                           // Threshold to show "days, hours, minutes, seconds", otherwise show "hours, minutes, seconds"
     const DAYS_DIGITAL_FONT = false;                    // Days to be displayed with a digital font
-    const DISPLAY_BORDER = false;                       // Days to be displayed with a digital font
+    const DISPLAY_BORDER = false;                       // Displays a border around the element
     const EVENT_NAME = "NEW YEAR COUNTDOWN";            // Name of event
     //////////////////////////////////////////////////////
 
