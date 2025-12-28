@@ -11,6 +11,7 @@
     const FORCE_DISPLAY_ON_LOAD = 'false';              // Ignore user preference and display countdown on page load
     const DAYS_THRESHOLD = 7;                           // Threshold to show "days, hours, minutes, seconds", otherwise show "hours, minutes, seconds"
     const DAYS_DIGITAL_FONT = false;                    // Days to be displayed with a digital font
+    const DISPLAY_BORDER = false;                       // Days to be displayed with a digital font
     const EVENT_NAME = "NEW YEAR COUNTDOWN";            // Name of event
     //////////////////////////////////////////////////////
 
@@ -146,13 +147,15 @@
         countdownDiv.style.width = '99%';
         countdownDiv.style.maxWidth = '1160px';
         countdownDiv.style.position = 'absolute';
-        countdownDiv.style.top = '-2px';
+        countdownDiv.style.top = '0';
         countdownDiv.style.left = '50%';
+        countdownDiv.style.paddingTop = '12px';
+        countdownDiv.style.paddingBottom = '20px';
+        countdownDiv.style.lineHeight = '1.1';
         countdownDiv.style.transform = 'translateX(-50%)';
-        //countdownDiv.style.border = '1px solid var(--color-2)';
+        if (DISPLAY_BORDER) countdownDiv.style.border = '1px solid var(--color-5)';
         countdownDiv.style.borderRadius = '14px';
         countdownDiv.style.backgroundColor = 'var(--color-1-transparent)';
-        countdownDiv.style.padding = '16px';
         countdownDiv.style.boxSizing = 'border-box';
         countdownDiv.style.opacity = '0';
         countdownDiv.style.transition = 'opacity 0.4s ease';
