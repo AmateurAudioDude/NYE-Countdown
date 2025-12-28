@@ -146,7 +146,7 @@
         countdownDiv.style.width = '99%';
         countdownDiv.style.maxWidth = '1160px';
         countdownDiv.style.position = 'absolute';
-        countdownDiv.style.top = '8px';
+        countdownDiv.style.top = '-2px';
         countdownDiv.style.left = '50%';
         countdownDiv.style.transform = 'translateX(-50%)';
         //countdownDiv.style.border = '1px solid var(--color-2)';
