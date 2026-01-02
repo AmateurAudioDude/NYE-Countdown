@@ -159,6 +159,7 @@
         countdownDiv.style.boxSizing = 'border-box';
         countdownDiv.style.opacity = '0';
         countdownDiv.style.transition = 'opacity 0.4s ease';
+        countdownDiv.style.userSelect = 'none';
 
         const parent = signalCanvas.parentNode;
         parent.style.position = 'relative';
