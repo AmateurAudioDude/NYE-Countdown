@@ -1,19 +1,22 @@
 /*
-    NYE Countdown v1.0.2 by AAD
-    ----------------------------
+    NYE Countdown v1.0.4 by AAD
+    ---------------------------
 */
 
 'use strict';
 
 (() => {
-    //////////////////////////////////////////////////////
-    const PLUGIN_ENABLED = true;                        // Threshold to show "days, hours, minutes, seconds", otherwise show "hours, minutes, seconds"
-    const FORCE_DISPLAY_ON_LOAD = 'false';              // Ignore user preference and display countdown on page load
-    const DAYS_THRESHOLD = 7;                           // Threshold to show "days, hours, minutes, seconds", otherwise show "hours, minutes, seconds"
-    const DAYS_DIGITAL_FONT = false;                    // Days to be displayed with a digital font
-    const DISPLAY_BORDER = false;                       // Displays a border around the element
-    const EVENT_NAME = "NEW YEAR COUNTDOWN";            // Name of event
-    //////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    const PLUGIN_ENABLED = true;                            // Threshold to show "days, hours, minutes, seconds", otherwise show "hours, minutes, seconds"
+    const FORCE_DISPLAY_ON_LOAD = 'false';                  // Ignore user preference and display countdown on page load
+    const DAYS_THRESHOLD = 7;                               // Threshold to show "days, hours, minutes, seconds", otherwise show "hours, minutes, seconds"
+    const DIGITAL_FONT = false;                             // Countdown to be displayed with a digital font
+    const DAYS_DIGITAL_FONT = false;                        // Days to be displayed with a digital font
+    const DISPLAY_BORDER = false;                           // Displays a border around the element
+    const EVENT_NAME = "NEW YEAR COUNTDOWN";                // Name of event
+    const END_COUNTDOWN_TEXT = "Happy New Year!";           // Text when countdown ends
+    const COUNTDOWN_TIME = "2026-12-31T00:00:00.000Z";      // Time when countdown ends
+    //////////////////////////////////////////////////////////
 
     let showOnLoad = (FORCE_DISPLAY_ON_LOAD === 'true' ? FORCE_DISPLAY_ON_LOAD : '') || localStorage.getItem("pluginNyeCountdown");
     let firstLoad = false;
@@ -24,12 +27,26 @@
     let initialServerTime = null;
     let fetchLocalTime = null;
 
+    function toZoneWallTime(ms, timeZone) {
+        const parts = {};
+        new Intl.DateTimeFormat('en-US', {
+            timeZone, hourCycle: 'h23',
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+        }).formatToParts(ms).forEach(p => { parts[p.type] = p.value; });
+        return Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second) + (ms % 1000);
+    }
+
     async function syncServerTime() {
         try {
             const response = await fetch('/server_time');
             const data = await response.json();
 
-            initialServerTime = new Date(data.serverTime).getTime();
+            let serverMs = new Date(data.serverTime).getTime();
+            if (data.timeZone) {
+                try { serverMs = toZoneWallTime(serverMs, data.timeZone); } catch (e) {}
+            }
+            initialServerTime = serverMs;
             fetchLocalTime = Date.now(); // Record local time of sync
 
             // console.log("Server resynced:", new Date(initialServerTime).toISOString());
@@ -59,7 +76,8 @@
         const currentYear = now.getFullYear();
         const nextYear = (now.getMonth() === 0) ? currentYear : currentYear + 1;
 
-        const newYear = new Date(`${nextYear}-01-01T00:00:00.000Z`).getTime();
+        //const newYear = new Date(`${nextYear}-01-01T00:00:00.000Z`).getTime();
+        const newYear = new Date(`${COUNTDOWN_TIME}`).getTime();
         const serverTime = getServerTime();
 
         if (!serverTime) return;
@@ -104,7 +122,7 @@
         if (timeLeft < 0) {
             clearInterval(updateInterval);
             clearInterval(resyncInterval);
-            countdownElement.innerHTML = `<span style="font-size: ${fontSize}px; color: var(--color-5);">Happy New Year!</span>`;
+            countdownElement.innerHTML = `<span style="font-size: ${fontSize}px; color: var(--color-5);">${END_COUNTDOWN_TEXT}</span>`;
         }
     }
 
@@ -167,7 +185,7 @@
         parent.appendChild(countdownDiv);
     }
 
-    loadFont('./DSEG7Modern-Regular.ttf'); // https://github.com/keshikan/DSEG/releases
+    if (DIGITAL_FONT) loadFont('./DSEG7Modern-Regular.ttf'); // https://github.com/keshikan/DSEG/releases
     //loadFont('./DSEG14Modern-Regular.ttf'); // https://github.com/keshikan/DSEG/releases
                                    
     const interval = setInterval(updateCountdown, 500);

@@ -1,7 +1,7 @@
 // Plugin configuration, this is used in the administration when plugins are loaded
 var pluginConfig = {
     name: 'NYE',
-    version: '1.0.2',
+    version: '1.0.4',
     author: 'AAD',
     frontEndPath: 'NYE/pluginNYE.js'
 }
